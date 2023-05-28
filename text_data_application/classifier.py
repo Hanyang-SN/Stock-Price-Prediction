@@ -1,36 +1,37 @@
-import torch
-from transformers import BertTokenizer, BertForSequenceClassification
+from datetime import date
+import re
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
+# import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import pandas as pd
 
-def predict_sentiment(text):
-    encoded_text = tokenizer.encode_plus(
-        text,
-        max_length=128,
-        add_special_tokens=True,
-        return_token_type_ids=False,
-        padding='max_length',
-        truncation=True,
-        return_attention_mask=True,
-        return_tensors='pt'
-    )
-    input_ids = encoded_text['input_ids']
-    attention_mask = encoded_text['attention_mask']
+from crawler import crawler
+from preprocessor import preprocesser
 
-    with torch.no_grad():
-        outputs = model(input_ids, attention_mask)
-        logits = outputs[0]
+# 최초 실행 시
+# nltk.download('all')
 
-    probs = torch.softmax(logits, dim=-1)
-    prob_neg = probs[0][0].item()
-    prob_pos = probs[0][1].item()
+search_keyword = "삼성전자"
+search_date = date(2018, 1, 1)
+search_num = 50
 
-    if prob_pos > prob_neg:
-        return "Positive"
-    else:
-        return "Negative"
-    
-test_sentences = ["테스트 문장입니다.", ""]
-for sentence in test_sentences:
-    predict_sentiment(sentence)
+# 데이터 수집
+df = crawler(search_keyword, search_date, search_num)
+
+# 데이터 전처리
+preprocesser(df)
+
+# TODO: 저장된 데이터의 마지막 번호 뒷 부분 부터 크롤링 시작하기
+
+score_list, title_containing_keyword_list = [], []
+
+# 각각의 감성 점수
+sia = SentimentIntensityAnalyzer()
+for [en, ko] in zip(df["title-en"], df["title-ko"]):
+    sia_score = sia.polarity_scores(en)['compound']
+    if sia_score != 0:
+        score_list.append(sia_score)
+        title_containing_keyword_list.append(ko.find(search_keyword) != -1)
+
+new_df = pd.DataFrame({"score" : score_list, "title containing keyword" : title_containing_keyword_list})
+new_df.to_csv(f"./text_data_application/data/{search_keyword}-{search_date}-{search_num}")
