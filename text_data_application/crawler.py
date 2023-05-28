@@ -24,16 +24,7 @@ def crawler(search_keyword: str, search_date: date, num_of_articles):
 			title = link.text	# 태그 안의 텍스트 요소를 가져온다.
 			title_list.append(title)
 
-	df = pd.DataFrame({"title" : title_list})
-	df.to_csv(f"./text_data_application/data/{search_keyword}-{search_date}-{num_of_articles}")
-
-
-def crawler_from_to(start_date: date, end_date: date):
-    # 5년 간 뉴스 데이터 크롤링
-    diff_days = end_date - start_date
-    for delta in range(diff_days.days):
-        curr_date = start_date + timedelta(days=delta)
-        crawler("삼성전자", curr_date, 50)
-        
-# 날짜 별로 자료 수집하기 위함
-crawler_from_to(date(2018, 1, 1), date(2023, 1, 1))
+	# df = pd.DataFrame({"title" : title_list})
+	# df.to_csv(f"./text_data_application/data/{search_keyword}-{search_date}-{num_of_articles}")
+ 
+	return pd.DataFrame({"title" : title_list})
