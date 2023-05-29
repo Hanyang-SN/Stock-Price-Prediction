@@ -4,11 +4,9 @@ import os
 
 from g_variable import *
 
-
-
 def calculate_score(keyword, data_num):
     
-    new_df = pd.DataFrame({"data" :[], "score" : []})
+    new_df = pd.DataFrame({"date" :[], "score" : []})
     
     for delta in range(DIFF_DAYS.days):
         curr_date = START_DATE + timedelta(days=delta)
@@ -23,11 +21,10 @@ def calculate_score(keyword, data_num):
         # 데이터가 있는 경우
         df = pd.read_csv(file_name)
         total_senti_score = 0
-        weight = 2
         num_of_score = len(df)
         for i in range(num_of_score):
             if df.iloc[i]['title containing keyword']:
-                total_senti_score += (weight * df.iloc[i]['score']) / num_of_score
+                total_senti_score += (SCORE_WEIGHT * df.iloc[i]['score']) / num_of_score
             else:
                 total_senti_score += df.iloc[i]['score'] / num_of_score
         
