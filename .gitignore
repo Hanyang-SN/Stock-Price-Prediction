@@ -1,1 +1,3 @@
 tmp*
+__pycache__
+text_data_application/data
