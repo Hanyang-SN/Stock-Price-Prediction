@@ -7,11 +7,10 @@ import pandas as pd
 
 from crawler import crawler
 from preprocessor import preprocesser
+from g_variable import *
 
 # 최초 실행 시
 # nltk.download('all')
-
-OUTPUT_DIR = "./text_data_application/data"
 
 def show_processing():
     print("■", end="")
@@ -23,10 +22,10 @@ def classifier(search_keyword, search_date, search_num):
     if not os.path.isdir("./text_data_application"):
         os.mkdir("./text_data_application")
     
-    if not os.path.isdir(OUTPUT_DIR):
-        os.mkdir(OUTPUT_DIR)
+    if not os.path.isdir(DATA_DIR):
+        os.mkdir(DATA_DIR)
     
-    if os.path.isfile(f"{OUTPUT_DIR}/{search_keyword}-{search_date}-{search_num}"):
+    if os.path.isfile(f"{DATA_DIR}/{search_keyword}-{search_date}-{search_num}"):
         return
     
     # 데이터 수집
@@ -34,7 +33,7 @@ def classifier(search_keyword, search_date, search_num):
     show_processing()
     
     # 데이터 전처리
-    preprocesser(df)
+    df = preprocesser(df)
     show_processing()
 
     # TODO: 저장된 데이터의 마지막 번호 뒷 부분 부터 크롤링 시작하기
@@ -50,14 +49,11 @@ def classifier(search_keyword, search_date, search_num):
             title_containing_keyword_list.append(ko.find(search_keyword) != -1)
 
     new_df = pd.DataFrame({"score" : score_list, "title containing keyword" : title_containing_keyword_list})
-    new_df.to_csv(f"{OUTPUT_DIR}/{search_keyword}-{search_date}-{search_num}")
+    new_df.to_csv(f"{DATA_DIR}/{search_keyword}-{search_date}-{search_num}")
     show_processing()
 
 
 # 날짜 별로 자료 수집하기 위함
-start_date, end_date = date(2018, 1, 1), date(2023, 1, 1)
-
-diff_days = end_date - start_date
-for delta in range(diff_days.days):
-    curr_date = start_date + timedelta(days=delta)
-    classifier("삼성전자", curr_date, 50)
+for delta in range(DIFF_DAYS.days):
+    curr_date = START_DATE + timedelta(days=delta)
+    classifier(KEYWORD, curr_date, 50)
