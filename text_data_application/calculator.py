@@ -6,7 +6,7 @@ from g_variable import *
 
 
 
-def calculator(keyword, data_num):
+def calculate_score(keyword, data_num):
     
     new_df = pd.DataFrame({"data" :[], "score" : []})
     
@@ -43,4 +43,4 @@ def calculator(keyword, data_num):
         
     new_df.to_csv(f"{SCORE_DIR}/{keyword}")
 
-calculator(KEYWORD, 50)
+calculate_score(KEYWORD, 50)
