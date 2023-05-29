@@ -5,11 +5,12 @@ import pandas as pd
 translator = Translator()
 
 def preprocesser(sentences: pd.DataFrame):
-    translated_sentences = []
-    for sentence in sentences['title']:
-        translated_sentences.append(translator.translate(str(sentence), 'en', 'ko').text)
+    try:
+        translated_sentences = []
+        for sentence in sentences['title-ko']:
+            translated_sentences.append(translator.translate(str(sentence), 'en', 'ko').text)
 
-    sentences.rename(columns={"title" : "title-ko"}, inplace=True)
-    sentences["title-en"] = translated_sentences
-    
+        sentences["title-en"] = translated_sentences
+    except TypeError as e:
+        print("Exception Occured:", e)
     return sentences

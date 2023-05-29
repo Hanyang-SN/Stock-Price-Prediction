@@ -27,4 +27,4 @@ def crawler(search_keyword: str, search_date: date, num_of_articles):
 	# df = pd.DataFrame({"title" : title_list})
 	# df.to_csv(f"./text_data_application/data/{search_keyword}-{search_date}-{num_of_articles}")
  
-	return pd.DataFrame({"title" : title_list})
+	return pd.DataFrame({"title-ko" : title_list})
