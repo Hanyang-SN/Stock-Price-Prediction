@@ -1,3 +1,6 @@
+# train data    : 2018-01-01 ~ 2022-12-31 주가 데이터를 다운로드
+# test data     : 2023-01-01 ~ 2023-05-31 주가 데이터를 다운로드
+
 import os
 from pykrx import stock
 
@@ -52,7 +55,7 @@ def get_stock_price_data(ticker_str : str):
     if not os.path.isdir(TEST_DIR):
         os.mkdir(TEST_DIR)
     
-    file_name = f"{ticker_str}-{stock.get_market_ticker_name(ticker_str)}.csv"
+    file_name = f"{ticker_str}.csv"
     
     make_train_data_file(file_name, ticker_str)
     make_test_data_file(file_name, ticker_str)
