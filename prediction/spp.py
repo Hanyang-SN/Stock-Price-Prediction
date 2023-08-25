@@ -77,7 +77,7 @@ def get_10y_data(ticker_name):
   ticker_code = finance_code_dict[ticker_name]
   train_df = stock.get_market_ohlcv("20130101", "20221231", ticker_code)
   test_df = stock.get_market_ohlcv("20230101", "20230630", ticker_code)
-  return train_df['종가'], test_df['종가']
+  return pd.DataFrame(train_df['종가']), pd.DataFrame(test_df['종가'])
 
 """## 3) 데이터 정규화(Normalization)
 
@@ -95,14 +95,14 @@ class windowDataset(Dataset):
   # input_window    : 인풋 기간
   # output_window   : 아웃풋 기간
   # stride          :
-    def __init__(self, data_stream, input_window=80, output_window=20, stride=5):
+    def __init__(self, data_stream, input_window, output_window, n_features=1, stride=5):
         # data_stream의 행 개수를 구한다.
         L = data_stream.shape[0]
         # stride에 따라 샘플 개수를 구한다.
         num_samples = (L - input_window - output_window) // stride + 1
 
         # [window 크기 * sample 개수] 크기의, 0으로 채워진 배열을 만든다.
-        X = np.zeros([input_window, num_samples])
+        X = np.zeros([input_window, num_samples, n_features])
         Y = np.zeros([output_window, num_samples])
 
         # np.arange(num_samples): range(num_samples) 와 같음
@@ -112,11 +112,11 @@ class windowDataset(Dataset):
             X[:,i] = data_stream[start_x:start_x + input_window]
             # 2) Y:   output_window 만큼 자르기 (stride * i + input_window ~)
             start_y = start_x + input_window
-            Y[:,i] = data_stream[start_y:start_y + output_window]
+            Y[:,i] = data_stream[start_y:start_y + output_window]['종가']
 
 
         # shape       : [window 크기, sample 개수]
-        X = X.reshape(X.shape[0], X.shape[1], 1).transpose((1,0,2))
+        X = X.reshape(X.shape[0], X.shape[1], n_features).transpose((1,0,2))
         Y = Y.reshape(Y.shape[0], Y.shape[1], 1).transpose((1,0,2))
         self.x = X
         self.y = Y
@@ -141,19 +141,21 @@ class TFModel(nn.Module):
 # nlayers:    인코더 부분의 인코더 개수
 # nhead:      multihead attention 개수
 
-    def __init__(self, iw: int, ow: int, d_model: int, nhead: int, nlayers: int, dropout=0.5):
+    def __init__(self, iw: int, ow: int, d_model: int, nhead: int, nlayers: int, dropout=0.5, n_features=1):
         super(TFModel, self).__init__()
 
-        # 1개 인코더, 인풋 사이즈가 d_model이고 attention 개수는 nhead
+        # TransformerEncoderLayer 인스턴스 생성 ) 1개 인코더, 인풋 사이즈가 d_model이고 attention 개수는 nhead
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout)
 
         # stacked 인코더, nlayers 만큼 쌓여있다.
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=nlayers)
+
         self.pos_encoder = PositionalEncoding(d_model, dropout)
 
         # 인풋 차원 변환. 1차원 -> d_model//2차워 -> d_model차원
         self.encoder = nn.Sequential(
-            nn.Linear(1, d_model//2),
+            # nn.Linear(1, d_model//2),
+            nn.Linear(n_features, d_model//2),
             nn.ReLU(),
             nn.Linear(d_model//2, d_model)
         )
@@ -218,21 +220,30 @@ def gen_attention_mask(x):
 - Optimizer
 """
 
-# @title Hyper-parameter
-INPUT_WINDOW = 21*14
-OUTPUT_WINDOW = 4Model
-layer
-dropout
-multihead attention 개수
-Cost Function
-Optimizer
-Hyper-parameter
+# @title 데이터 가져오기
 
 train_data, test_data = get_10y_data('KB금융')
-train_dataset = windowDataset(train_data, input_window=INPUT_WINDOW, output_window=OUTPUT_WINDOW, stride=1)
-train_loader = DataLoader(train_dataset, batch_size=64)     # 64 = 2^6, 512 = 2^9
-test_dataset = windowDataset(train_data, input_window=INPUT_WINDOW, output_window=OUTPUT_WINDOW, stride=1)
-test_loader = DataLoader(train_dataset, batch_size=64)     # 64 = 2^6, 512 = 2^9
+
+# 추가하는 부분
+N_FEATURES=3
+
+train_data['RSI'] = 0
+test_data['RSI'] = 0
+
+train_data['EEE'] = 0
+test_data['EEE'] = 0
+
+# @title Hyper-parameter
+INPUT_WINDOW = 21*1
+OUTPUT_WINDOW = 4
+BATCH_SIZE=64
+
+train_dataset = windowDataset(train_data, input_window=INPUT_WINDOW,
+                              output_window=OUTPUT_WINDOW, stride=1, n_features=N_FEATURES)
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE)     # 64 = 2^6, 512 = 2^9
+test_dataset = windowDataset(train_data, input_window=INPUT_WINDOW,
+                             output_window=OUTPUT_WINDOW, stride=1, n_features=N_FEATURES)
+test_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE)     # 64 = 2^6, 512 = 2^9
 
 
 if torch.cuda.is_available():
@@ -241,9 +252,15 @@ else:
   device = torch.device('cpu')
 
 lr = 1e-4
-model = TFModel(iw=INPUT_WINDOW, ow=OUTPUT_WINDOW, d_model=512, nhead=8, nlayers=4, dropout=0.1).to(device)
+
+model = TFModel(iw=INPUT_WINDOW, ow=OUTPUT_WINDOW, d_model=512, nhead=8,
+                nlayers=4, dropout=0.1, n_features=N_FEATURES).to(device)
 criterion = nn.MSELoss()                                            # MSEloss(): ow 각 요소들의 합
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+
+test_data.tail()
+
+train_losses = []  # 각 에포크의 훈련 손실 값을 저장할 리스트
 
 # @title Train
 '''
@@ -259,25 +276,33 @@ torch.cuda.empty_cache()
 
 # for tqdm
 from tqdm import tqdm
-epoch = 30
+
+# for trainig mode
+epoch = 50
 model.train()
 progress = tqdm(range(epoch))
+
+# for drawing loss per epoch.
+max_non_improvement = 10  # 일정 기간동안 개선되지 않을 때 학습을 종료하기 위한 조건
+best_loss = float('inf')  # 최적의 손실 값을 추적하기 위한 변수
+no_improvement_count = 0  # 개선되지 않은 에포크 카운트
 
 for i in progress:
   batchloss = 0.0
   for (inputs, outputs) in train_loader:
     # inputs.shape: [batch_size, iw, 1]
     # outputs.shape: [batch_size, ow, 1]
-
     # Initialize grad
     optimizer.zero_grad()                                           # zero_grad()로 Torch.Tensor.grad 초기화. 초기화하지 않으면 다음 루프 backward() 시에 간섭함.
-
+    # 모델에 사용할 마스크 생성
     # Forward propagation with masking
     src_mask = model.generate_square_subsequent_mask(inputs.shape[1]).to(device)
+
     result = model(inputs.float().to(device), src_mask)             # forward
 
     # Backward propagation
     loss = criterion(result, outputs[:,:,0].float().to(device))     # ?? 64개 중 하나만 loss를 담네?
+    # print(f"[result]\n{result}\n\n[output[:,:,0]]\n{outputs[:,:,0]}\n\n[outputs]\n{outputs}")
     loss.backward()                                                 # backward
     optimizer.step()
     batchloss += loss
@@ -285,7 +310,29 @@ for i in progress:
   print()
   progress.set_description(f"loss: {batchloss.cpu().item() / len(train_loader):0.6f}")
 
+  # 훈련 손실 값 저장
+  train_losses.append(batchloss.cpu().item() / len(train_loader))
+
+  # 조기 종료 검사 및 학습 곡선 그리기
+  if batchloss < best_loss:
+    best_loss = batchloss
+    no_improvement_count = 0
+  else:
+    no_improvement_count += 1
+
+  if no_improvement_count >= max_non_improvement:
+    print(f"Early stopping due to no improvement for {max_non_improvement} epochs.")
+    break
+
 progress.close()
+
+# 학습 곡선 그리기
+plt.plot(range(1, len(train_losses) + 1), train_losses, label='Train Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Training Loss Curve')
+plt.legend()
+plt.show()
 
 """## 3) Test"""
 
@@ -299,6 +346,9 @@ total = 0
 # 기울기 계산을 방지하기 위해 torch.no_grad() 블록 안에서 평가
 with torch.no_grad():
   for (inputs, outputs) in tqdm(test_loader, desc="Evaluating"):
+    # print(f"[inputs]\n{inputs}")
+    # print(f"[outputs]\n{outputs}")
+
     # Forward propagation with masking
     src_mask = model.generate_square_subsequent_mask(inputs.shape[1]).to(device)
     result = model(inputs.float().to(device), src_mask)
