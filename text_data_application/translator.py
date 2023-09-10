@@ -4,7 +4,7 @@ import pandas as pd
 
 translator = Translator()
 
-def preprocesser(sentences: pd.DataFrame):
+def translate(sentences: pd.DataFrame):
     try:
         # 번역
         translated_sentences = []
