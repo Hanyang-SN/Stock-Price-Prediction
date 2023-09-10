@@ -69,15 +69,15 @@ class NewsSentimentAnalysis:
 		return result
 					
 	def __translate_headline(self, news_headline: pd.DataFrame):
-		# try:
-		# 	# 데이터 프레임에 열 추가
-		# 	news_headline["title-en"] = news_headline["title-ko"].apply(lambda x: self.translator.translate(str(x), 'en', 'ko').text)
-		# except TypeError as e:
-		# 	print("----------------------------------")
-		# 	print("Exception Occured:", e)
-		# 	print("----------------------------------")
+		try:
+			# 데이터 프레임에 열 추가
+			news_headline["title-en"] = news_headline["title-ko"].apply(lambda x: self.translator.translate(str(x), dest='en', src='ko').text)
+		except TypeError as e:
+			print("----------------------------------")
+			print("Exception Occured:", e)
+			print("----------------------------------")
 		
-		# self.__print_log(level="INFO", function="__translate_headline", content=f"번역 결과\n{news_headline}")
+		self.__print_log(level="INFO", function="__translate_headline", content=f"번역 결과\n{news_headline}")
 	
 	def __get_sentiment_score(self):
 		pass
@@ -88,7 +88,7 @@ class NewsSentimentAnalysis:
 	
 	def __analysis_one_day(self):
 		news_headline = self.__crawl_headline()	
-		self.__translate_headline(news_headline)
+		self.__translate_headline(news_headline)        # 오래 걸린다. 참고 ㅎ
 		self.__get_sentiment_score()
 		self.__get_integrated_score()
 		
