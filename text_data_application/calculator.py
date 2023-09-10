@@ -30,7 +30,6 @@ def calculate_score(keyword, data_num):
         
         new_df.loc[delta + 1] = [curr_date, total_senti_score]
     
-    print(new_df)
     
     if not os.path.isdir("./text_data_application"):
         os.mkdir("./text_data_application")
