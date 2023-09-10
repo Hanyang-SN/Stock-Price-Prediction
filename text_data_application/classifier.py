@@ -54,6 +54,10 @@ def classifier(search_keyword, search_date, search_num):
 
 
 # 날짜 별로 자료 수집하기 위함
-for delta in range(DIFF_DAYS.days):
-    curr_date = START_DATE + timedelta(days=delta)
-    classifier(KEYWORD, curr_date, 50)
+while not os.path.isfile(f"{DATA_DIR}/{KEYWORD}-{END_DATE}-50"):
+    try:
+        for delta in range(DIFF_DAYS.days):
+            curr_date = START_DATE + timedelta(days=delta)
+            classifier(KEYWORD, curr_date, 50)
+    except:
+        pass
