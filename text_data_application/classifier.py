@@ -6,7 +6,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import pandas as pd
 
 from crawler import crawler
-from preprocessor import preprocesser
+from translator import translator
 from g_variable import *
 
 # 최초 실행 시
