@@ -13,9 +13,11 @@ from bs4 import BeautifulSoup
 from datetime import date, timedelta
 import pandas as pd
 
-# translate_headline
+# for translate_headline()
 from googletrans import Translator
 
+# for get_sentiment_score()
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # for logging
 LOGGING = True	# 로그 포맷: f"level:{} function:{} content:{}  "
@@ -31,6 +33,7 @@ class NewsSentimentAnalysis:
 		self.news_keyword_list = news_keyword_list if news_keyword_list else [ticker_name]		# news_keyword_list가 전달되지 않으면 ticker_name 만 검색함.
 		self.news_date = ""
 		self.translator = Translator()
+		self.sia = SentimentIntensityAnalyzer()
 		self.__print_log(level="INFO", function=f"__init__", content=f"객체 생성됨. ticker name: {ticker_name}")
 
 	def __crawl_headline(self) -> pd.DataFrame:
@@ -79,24 +82,28 @@ class NewsSentimentAnalysis:
 		
 		self.__print_log(level="INFO", function="__translate_headline", content=f"번역 결과\n{news_headline}")
 	
-	def __get_sentiment_score(self):
-		pass
+	def __get_sentiment_score(self, news_headline):
+        # 데이터 프레임에 열 추가
+		news_headline["score"] = news_headline["title-en"].apply(lambda x: self.sia.polarity_scores(x)['compound'])
+		self.__print_log(level="INFO", function="__get_sentiment_score", content=f"감성 분석 결과\n{news_headline}")
 	
-	def __get_integrated_score(self):
-		pass
-
+	def __get_integrated_score(self, news_headline):
+		
+		integerated_score = sum(news_headline["score"]) / self.news_num
+		self.__print_log(level="INFO", function="__get_integrated_score", content=f"감성 점수 취합\n{integerated_score}")
+		return integerated_score
 	
 	def __analysis_one_day(self):
 		news_headline = self.__crawl_headline()	
 		self.__translate_headline(news_headline)        # 오래 걸린다. 참고 ㅎ
-		self.__get_sentiment_score()
-		self.__get_integrated_score()
+		self.__get_sentiment_score(news_headline)
+		self.__get_integrated_score(news_headline)
 		
 	
 	def __print_log(self, level="", function="", content=""):
 		if not LOGGING:
 			return
-		print(f"======level:{level}======\
+		print(f"============level:{level}============\
 				\nfunc:\t\t{function}\
 				\ncontent:\t{content}")
 		print()
