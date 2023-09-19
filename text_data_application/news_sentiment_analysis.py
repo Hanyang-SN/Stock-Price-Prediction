@@ -23,6 +23,11 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 LOGGING = True	# 로그 포맷: f"level:{} function:{} content:{}  "
 # debug(on demand)-> info -> warn -> error -> fatal
 
+# for saving
+import os
+NEWS_SENTIMENT_ANALYSIS_DIR = "./text_application"
+SCORE_DIR = NEWS_SENTIMENT_ANALYSIS_DIR + "/score"
+START_DATE, END_DATE = date(2013, 1, 1), date(2023, 1, 1)			# 10년 데이터 수집
 
 # 모델을 call하면 이전 정보에 이어서 계속적으로 실행
 class NewsSentimentAnalysis:
@@ -31,10 +36,24 @@ class NewsSentimentAnalysis:
 		self.ticker_name = ticker_name
 		self.news_num = news_num
 		self.news_keyword_list = news_keyword_list if news_keyword_list else [ticker_name]		# news_keyword_list가 전달되지 않으면 ticker_name 만 검색함.
-		self.news_date = ""
+		# self.news_date: date = None
+		
 		self.translator = Translator()
 		self.sia = SentimentIntensityAnalyzer()
-		self.__print_log(level="INFO", function=f"__init__", content=f"객체 생성됨. ticker name: {ticker_name}")
+		self.file_name = f"{SCORE_DIR}/{ticker_name}"
+
+		if not os.path.isfile(self.file_name):
+			self.sentiment_df = pd.DataFrame(columns=["date", self.ticker_name])
+			self.sentiment_df.set_index('date', inplace=True)
+			self.news_date = START_DATE
+		else:
+			self.sentiment_df = pd.read_csv(self.file_name)
+			self.news_date = self.sentiment_df.index[-1]
+
+		self.__print_log(level="INFO", function=f"__init__",\
+				   content=f"객체 생성됨.\n\
+				   ticker name: {ticker_name}\n\
+				   news_date(시작 일자): {self.news_date}")
 
 	def __crawl_headline(self) -> pd.DataFrame:
 
@@ -87,17 +106,17 @@ class NewsSentimentAnalysis:
 		news_headline["score"] = news_headline["title-en"].apply(lambda x: self.sia.polarity_scores(x)['compound'])
 		self.__print_log(level="INFO", function="__get_sentiment_score", content=f"감성 분석 결과\n{news_headline}")
 	
-	def __get_integrated_score(self, news_headline):
+	def __get_integrated_score(self, news_headline) -> int:
 		
 		integerated_score = sum(news_headline["score"]) / self.news_num
 		self.__print_log(level="INFO", function="__get_integrated_score", content=f"감성 점수 취합\n{integerated_score}")
 		return integerated_score
 	
-	def __analysis_one_day(self):
+	def __analysis_one_day(self) -> int:
 		news_headline = self.__crawl_headline()	
 		self.__translate_headline(news_headline)        # 오래 걸린다. 참고 ㅎ
 		self.__get_sentiment_score(news_headline)
-		self.__get_integrated_score(news_headline)
+		return self.__get_integrated_score(news_headline)
 		
 	
 	def __print_log(self, level="", function="", content=""):
@@ -115,10 +134,14 @@ class NewsSentimentAnalysis:
 		# TODO: 진행된 날짜 이후부터 재진행
 
 
-		self.news_date = date(2013, 1, 1)
-		self.__analysis_one_day()
+		# self.news_date = date(2013, 1, 1)
+		while self.news_date < END_DATE:
+			self.sentiment_df.loc[self.news_date] = [self.__analysis_one_day()]
+			# self.sentiment_df.loc[self.news_date] = [0]
+			self.__print_log(level="INFO", function="__call",\
+					content=f"{self.news_date}일자 감성 분석 완료\n감성 분석 결과:\n{self.sentiment_df.tail()}")
 
-
+			self.news_date += timedelta(days=1)
 
 
 news_module = NewsSentimentAnalysis('KB금융')
