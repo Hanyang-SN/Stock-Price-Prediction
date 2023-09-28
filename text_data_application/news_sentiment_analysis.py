@@ -150,7 +150,7 @@ class NewsSentimentAnalysis:
 			self.__print_log(level="INFO", function="__call",\
 					content=f"{self.news_date}일자 감성 분석 완료\n감성 분석 결과:\n{self.sentiment_df.tail()}")
 
-			if self.news_date.day == 1:
+			if self.news_date.day % 5 == 0:
 				self.__backup_as_file()
 			self.news_date += timedelta(days=1)
 
@@ -159,3 +159,16 @@ class NewsSentimentAnalysis:
 
 news_module = NewsSentimentAnalysis('KB금융')
 news_module()
+
+# Make code dictionary.
+finance_code_dict = dict()
+finance_code_list = "KB금융	105560 신한지주	055550 하나금융지주	086790 메리츠금융지주	138040 기업은행	024110 미래에셋증권	006800 NH투자증권	005940 삼성증권	016360".split()
+for i in range(8):
+  finance_code_dict[finance_code_list[2*i]] = finance_code_list[2*i + 1]
+
+for ticker_name in finance_code_dict:
+	# thread 여러 개 돌리면 차단됨 T.T .. 순차적으로 돌리기.
+	news_module = NewsSentimentAnalysis(ticker_name)
+	news_module()
+
+print("main thread exit")
