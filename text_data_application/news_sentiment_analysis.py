@@ -25,8 +25,7 @@ LOGGING = True	# 로그 포맷: f"level:{} function:{} content:{}  "
 
 # for saving
 import os
-NEWS_SENTIMENT_ANALYSIS_DIR = "./text_application"
-SCORE_DIR = NEWS_SENTIMENT_ANALYSIS_DIR + "/score"
+SCORE_DIR = "./news_sentiment_score"
 START_DATE, END_DATE = date(2013, 1, 1), date(2023, 1, 1)			# 10년 데이터 수집
 
 # 모델을 call하면 이전 정보에 이어서 계속적으로 실행
@@ -40,7 +39,7 @@ class NewsSentimentAnalysis:
 		
 		self.translator = Translator()
 		self.sia = SentimentIntensityAnalyzer()
-		self.file_name = f"{SCORE_DIR}/{ticker_name}"
+		self.file_name = f"{SCORE_DIR}/{ticker_name}.csv"
 
 		if not os.path.isfile(self.file_name):
 			self.sentiment_df = pd.DataFrame(columns=["date", self.ticker_name])
@@ -48,7 +47,8 @@ class NewsSentimentAnalysis:
 			self.news_date = START_DATE
 		else:
 			self.sentiment_df = pd.read_csv(self.file_name)
-			self.news_date = self.sentiment_df.index[-1]
+			self.sentiment_df.set_index('date', inplace=True)
+			self.news_date = date.fromisoformat(self.sentiment_df.index[-1])
 
 		self.__print_log(level="INFO", function=f"__init__",\
 				   content=f"객체 생성됨.\n\
@@ -102,7 +102,7 @@ class NewsSentimentAnalysis:
 		self.__print_log(level="INFO", function="__translate_headline", content=f"번역 결과\n{news_headline}")
 	
 	def __get_sentiment_score(self, news_headline):
-        # 데이터 프레임에 열 추가
+		# 데이터 프레임에 열 추가
 		news_headline["score"] = news_headline["title-en"].apply(lambda x: self.sia.polarity_scores(x)['compound'])
 		self.__print_log(level="INFO", function="__get_sentiment_score", content=f"감성 분석 결과\n{news_headline}")
 	
@@ -118,7 +118,20 @@ class NewsSentimentAnalysis:
 		self.__get_sentiment_score(news_headline)
 		return self.__get_integrated_score(news_headline)
 		
-	
+	def __backup_as_file(self):
+	 	# Dir이 로컬에 없으면 생성		
+		if not os.path.isdir(SCORE_DIR):
+			os.mkdir(SCORE_DIR)
+			self.__print_log(level="INFO", function="__backup_as_file", content=f"폴더 생성: {SCORE_DIR}")
+		
+		# File이 로컬에 있으면 삭제하고 새로 저장.
+		if os.path.isfile(self.file_name):
+			os.remove(self.file_name)
+			self.__print_log(level="INFO", function="__backup_as_file", content=f"파일 삭제: {self.file_name}")
+
+		self.sentiment_df.to_csv(self.file_name)
+		self.__print_log(level="INFO", function="__backup_as_file", content=f"파일  생성: {self.file_name}\n파일 내용: {self.sentiment_df}")
+
 	def __print_log(self, level="", function="", content=""):
 		if not LOGGING:
 			return
@@ -129,10 +142,6 @@ class NewsSentimentAnalysis:
 
 
 	def __call__(self):
-	 	# TODO: File이 로컬에 없으면 생성
-		# TODO: File에서 이전까지 진행된 날짜 확인
-		# TODO: 진행된 날짜 이후부터 재진행
-
 
 		# self.news_date = date(2013, 1, 1)
 		while self.news_date < END_DATE:
@@ -141,9 +150,12 @@ class NewsSentimentAnalysis:
 			self.__print_log(level="INFO", function="__call",\
 					content=f"{self.news_date}일자 감성 분석 완료\n감성 분석 결과:\n{self.sentiment_df.tail()}")
 
+			if self.news_date.day % 5 == 0:
+				self.__backup_as_file()
 			self.news_date += timedelta(days=1)
+
+		self.__backup_as_file()
 
 
 news_module = NewsSentimentAnalysis('KB금융')
 news_module()
-
