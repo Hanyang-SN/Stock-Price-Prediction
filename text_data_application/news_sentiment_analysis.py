@@ -150,7 +150,7 @@ class NewsSentimentAnalysis:
 			self.__print_log(level="INFO", function="__call",\
 					content=f"{self.news_date}일자 감성 분석 완료\n감성 분석 결과:\n{self.sentiment_df.tail()}")
 
-			if self.news_date.day % 5 == 0:
+			if self.news_date.day == 1:
 				self.__backup_as_file()
 			self.news_date += timedelta(days=1)
 
