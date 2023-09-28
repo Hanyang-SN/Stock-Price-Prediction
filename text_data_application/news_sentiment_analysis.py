@@ -48,7 +48,7 @@ class NewsSentimentAnalysis:
 		else:
 			self.sentiment_df = pd.read_csv(self.file_name)
 			self.sentiment_df.set_index('date', inplace=True)
-			self.news_date = date.fromisoformat(self.sentiment_df.index[-1])
+			self.news_date = date.fromisoformat(self.sentiment_df.index[-1]) + timedelta(days=1)
 
 		self.__print_log(level="INFO", function=f"__init__",\
 				   content=f"객체 생성됨.\n\
