@@ -28,6 +28,10 @@ import os
 SCORE_DIR = "./news_sentiment_score"
 START_DATE, END_DATE = date(2013, 1, 1), date(2023, 1, 1)			# 10년 데이터 수집
 
+# for nltk
+import nltk
+nltk.download('vader_lexicon')
+
 # 모델을 call하면 이전 정보에 이어서 계속적으로 실행
 class NewsSentimentAnalysis:
 	
@@ -39,14 +43,17 @@ class NewsSentimentAnalysis:
 		
 		self.translator = Translator()
 		self.sia = SentimentIntensityAnalyzer()
-		self.file_name = f"{SCORE_DIR}/{ticker_name}.csv"
+		self.file_name_prefix = f"{SCORE_DIR}/{ticker_name}"
 
-		if not os.path.isfile(self.file_name):
+		files = os.listdir(SCORE_DIR)
+		prefix_files = sorted([f for f in files if f.startswith('KB금융')])
+
+		if not prefix_files:
 			self.sentiment_df = pd.DataFrame(columns=["date", self.ticker_name])
 			self.sentiment_df.set_index('date', inplace=True)
 			self.news_date = START_DATE
 		else:
-			self.sentiment_df = pd.read_csv(self.file_name)
+			self.sentiment_df = pd.read_csv(f"{SCORE_DIR}/{prefix_files[-1]}")
 			self.sentiment_df.set_index('date', inplace=True)
 			self.news_date = date.fromisoformat(self.sentiment_df.index[-1]) + timedelta(days=1)
 
@@ -69,7 +76,7 @@ class NewsSentimentAnalysis:
 					# naver 서버에서 html을 줌
 					resp = requests.get(url)
 					if resp.status_code != 200:
-						self.__print_log_(level="ERROR", function="__crawl_headline", content=f"request to NAVER failure")
+						self.__print_log(level="ERROR", function="__crawl_headline", content=f"request to NAVER failure\nstatus_code: {resp.status_code}")
 						return
 
 					# html paser가 soup를 만듬 
@@ -124,13 +131,8 @@ class NewsSentimentAnalysis:
 			os.mkdir(SCORE_DIR)
 			self.__print_log(level="INFO", function="__backup_as_file", content=f"폴더 생성: {SCORE_DIR}")
 		
-		# File이 로컬에 있으면 삭제하고 새로 저장.
-		if os.path.isfile(self.file_name):
-			os.remove(self.file_name)
-			self.__print_log(level="INFO", function="__backup_as_file", content=f"파일 삭제: {self.file_name}")
-
-		self.sentiment_df.to_csv(self.file_name)
-		self.__print_log(level="INFO", function="__backup_as_file", content=f"파일  생성: {self.file_name}\n파일 내용: {self.sentiment_df}")
+		self.sentiment_df.to_csv(f"{self.file_name_prefix}_{self.news_date.year}{self.news_date.month:02}{self.news_date.day:02}.csv")
+		self.__print_log(level="INFO", function="__backup_as_file", content=f"파일  생성: {self.file_name_prefix}_{self.news_date.year}{self.news_date.month:02}{self.news_date.day:02}.csv")
 
 	def __print_log(self, level="", function="", content=""):
 		if not LOGGING:
