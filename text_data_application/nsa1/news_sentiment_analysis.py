@@ -32,6 +32,8 @@ START_DATE, END_DATE = date(2013, 1, 1), date(2023, 1, 1)			# 10년 데이터 �
 import nltk
 nltk.download('vader_lexicon')
 
+import time
+
 # 모델을 call하면 이전 정보에 이어서 계속적으로 실행
 class NewsSentimentAnalysis:
 	
@@ -95,6 +97,8 @@ class NewsSentimentAnalysis:
 		result = None
 		while result is None:
 			result = __wrapped()
+			time.sleep(5)
+			
 		return result
 					
 	def __translate_headline(self, news_headline: pd.DataFrame):
@@ -159,13 +163,15 @@ class NewsSentimentAnalysis:
 		self.__backup_as_file()
 
 
-# Make code dictionary.
-finance_code_dict = dict()
-finance_code_list = "KB금융	105560 신한지주	055550 하나금융지주	086790 메리츠금융지주	138040 기업은행	024110 미래에셋증권	006800 NH투자증권	005940 삼성증권	016360".split()
-for i in range(8):
-  finance_code_dict[finance_code_list[2*i]] = finance_code_list[2*i + 1]
+# # Make code dictionary.
+# finance_code_dict = dict()
+# finance_code_list = "KB금융	105560 신한지주	055550 하나금융지주	086790 메리츠금융지주	138040 기업은행	024110 미래에셋증권	006800 NH투자증권	005940 삼성증권	016360".split()
+# for i in range(8):
+#   finance_code_dict[finance_code_list[2*i]] = finance_code_list[2*i + 1]
 
-for ticker_name in finance_code_dict:
-	# thread 여러 개 돌리면 차단됨 T.T .. 순차적으로 돌리기.
-	news_module = NewsSentimentAnalysis(ticker_name)
-	news_module()
+# for ticker_name in finance_code_dict:
+# 	# thread 여러 개 돌리면 차단됨 T.T .. 순차적으로 돌리기.
+# 	news_module = NewsSentimentAnalysis(ticker_name)
+# 	news_module()
+news_module = NewsSentimentAnalysis("KB금융")
+news_module()

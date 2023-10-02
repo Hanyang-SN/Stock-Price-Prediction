@@ -10,5 +10,5 @@ COPY . .
 
 RUN pip install -r ./requirements.txt
 
-CMD ["python", "news_sentiment_analysis.py"]
+CMD ["python", "news_sentiment_analysis2.py"]
 
