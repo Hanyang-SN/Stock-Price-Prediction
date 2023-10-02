@@ -2,9 +2,13 @@
 
 
 while true; do
-    python3 ./text_data_application/news_sentiment_analysis.py
-    echo "Program exited with status $?."
-    echo "REstarting program now ..."
+    nohup python ./text_data_application/nsa1/news_sentiment_analysis.py > log/news_sentiment_anaysis.log &
+    PID=$!
+
+    wait $PID
+
+    echo "Restarting program now ..."
+    
     sleep 2
 done
 
