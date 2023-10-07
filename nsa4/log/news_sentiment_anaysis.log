@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\HB\Desktop\ÀÌ¼öºó\Stock-Price-Prediction\text_data_application\nsa4\news_sentiment_analysis.py", line 14, in <module>
+    import pandas as pd
+  File "C:\Users\HB\anaconda3\envs\spp-env\Lib\site-packages\pandas\__init__.py", line 152, in <module>
+    from pandas.io.api import (
+  File "C:\Users\HB\anaconda3\envs\spp-env\Lib\site-packages\pandas\io\api.py", line 32, in <module>
+    from pandas.io.sql import (
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1069, in get_code
+  File "<frozen importlib._bootstrap_external>", line 729, in _compile_bytecode
+KeyboardInterrupt
