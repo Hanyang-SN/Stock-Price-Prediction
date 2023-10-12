@@ -147,6 +147,6 @@ for i in range(8):
     stochastic = calculate_stochastic(stock_list[i])
     volume = calculate_volume(stock_list[i])
     combined_df = pd.concat([rsi, macd, bollinger_bands,cci ,stochastic, volume], axis=1)
-    combined_df.to_csv(df.iloc[i,1]+'_technical_index_data.csv', index=False)  # index 열을 저장하지 않으려면 index=False로 설정
+    combined_df.to_csv(df.iloc[i,1]+'_technical_index_data.csv', index=True)  # index 열을 저장하지 않으려면 index=False로 설정
 
 
