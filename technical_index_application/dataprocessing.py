@@ -27,7 +27,7 @@ RSI_list = []
 # : 특정일 코스피 종목들의 OHLCV(주식시세) O: 시가 (Open) H: 고가 (High) L: 저가 (Low) C: 종가 (Close) V: 거래량 (Volume)
 
 for i in df["code"]:
-    stock_list.append((stock.get_market_ohlcv("20230101", "20230630", str(i))))
+    stock_list.append((stock.get_market_ohlcv("20210101", "20231026", str(i))))
     # 특정 기간의 주식 OHLCV데이터를 불러와 stock_list에 append한다.
 
 # 기술지표 계산
@@ -147,6 +147,6 @@ for i in range(8):
     stochastic = calculate_stochastic(stock_list[i])
     volume = calculate_volume(stock_list[i])
     combined_df = pd.concat([rsi, macd, bollinger_bands,cci ,stochastic, volume], axis=1)
-    combined_df.to_csv(df.iloc[i,1]+'_technical_index_data.csv', index=False)  # index 열을 저장하지 않으려면 index=False로 설정
+    combined_df.to_csv(df.iloc[i,1]+'_technical_index_data.csv', index=True)  # index 열을 저장하지 않으려면 index=False로 설정
 
 
