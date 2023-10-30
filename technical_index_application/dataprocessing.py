@@ -27,7 +27,7 @@ RSI_list = []
 # : 특정일 코스피 종목들의 OHLCV(주식시세) O: 시가 (Open) H: 고가 (High) L: 저가 (Low) C: 종가 (Close) V: 거래량 (Volume)
 
 for i in df["code"]:
-    stock_list.append((stock.get_market_ohlcv("20210101", "20231026", str(i))))
+    stock_list.append((stock.get_market_ohlcv("20230910", "20231030", str(i))))
     # 특정 기간의 주식 OHLCV데이터를 불러와 stock_list에 append한다.
 
 # 기술지표 계산
@@ -37,7 +37,7 @@ for i in df["code"]:
 # 스무딩 과정 구현하기 위해 rolling() 함수 사용.
 # 일반적으로 RSI 지수는 14일을 기준으로 계산.
 # 따라서 14일 전 RSI는 NaN상태
-
+print(stock_list[0][-20:])
 
 def calculate_rsi(dataframe, window_size=14):
     # 전일 대비 수익률을 계산
