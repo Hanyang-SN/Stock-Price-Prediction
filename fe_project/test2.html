@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Info 창 토글</title>
+  <style>
+    .info {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #f9f9f9;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: auto;
+      max-height: 500px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <button id="toggleButton">정보 보기</button>
+  <div class="info" id="infoBox">
+    <div id="info">
+        <h2>팀 소개</h2>
+        우리는 한양대학교 학생이며 졸업프로젝트로 진행한 ~~ 을 웹으로 만들어 보았다. 이 사이트로는 8개의 종목을 svm, TF, lstm 3개의 모델로 분석해 볼 수 있다.<br><br>
+        <img src="./diagram.png">
+        
+        <li>
+            BE : 이수빈
+            <p>백엔드 개발 </p>
+  
+        </li>
+  
+        <li>
+            FE : 김나현
+            <p>html, JavaScript, css를 사용했으며 등</p>
+        </li>
+  
+        <a href="https://github.com/Hanyang-SN/Stock-Price-Prediction">깃허브 주소</a>
+  
+  </div>
+
+  <script>
+    const toggleButton = document.getElementById('toggleButton');
+    const infoBox = document.getElementById('infoBox');
+
+    toggleButton.addEventListener('click', function() {
+      if (infoBox.style.display === 'none' || infoBox.style.display === '') {
+        infoBox.style.display = 'block';
+        toggleButton.textContent = '정보 숨기기';
+      } else {
+        infoBox.style.display = 'none';
+        toggleButton.textContent = '정보 보기';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>버튼으로 정보 표시</title>
+    <style>
+        /* 정보를 숨길 초기 상태를 설정합니다. */
+        #info {
+            display: none;
+            background-color: rgb(255, 255, 255);
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button id="displayButton">페이지 정보</button>
+
+    <div id="info">
+      <h2>팀 소개</h2>
+      우리는 한양대학교 학생이며 졸업프로젝트로 진행한 ~~ 을 웹으로 만들어 보았다. 이 사이트로는 8개의 종목을 svm, TF, lstm 3개의 모델로 분석해 볼 수 있다.<br><br>
+      <img src="./diagram.png">
+      
+      <li>
+          BE : 이수빈
+          <p>백엔드 개발 </p>
+
+      </li>
+
+      <li>
+          FE : 김나현
+          <p>html, JavaScript, css를 사용했으며 등</p>
+      </li>
+
+      <a href="https://github.com/Hanyang-SN/Stock-Price-Prediction">깃허브 주소</a>
+
+
+    <script>
+        // 버튼 요소와 정보를 표시할 요소를 가져옵니다.
+        var displayButton = document.getElementById("displayButton");
+        var info = document.getElementById("info");
+
+        // 버튼 클릭 시 정보를 표시하는 함수
+        displayButton.addEventListener("click", function() {
+            // 정보를 표시하거나 숨기는 토글 기능을 구현합니다.
+            if (info.style.display === "none") {
+                info.style.display = "block";
+            } else {
+                info.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
