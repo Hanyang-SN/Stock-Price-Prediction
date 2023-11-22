@@ -7,10 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1TuQ-ts3CjIqE4nTXcnAbTAqtgOPIBxsm
 """
 
-!pip install pykrx
-!pip install sklearn
-!pip install tensorflow
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
