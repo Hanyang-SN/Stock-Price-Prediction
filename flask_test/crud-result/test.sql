@@ -1,0 +1,22 @@
+
+CREATE TABLE kb	        (date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE hana	    (date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE shinhan	(date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE ibk	    (date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE meritz	    (date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE miraesec	(date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE nhsec	    (date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+CREATE TABLE samsungsec	(date DATE PRIMARY KEY, LSTM SMALLINT, SVM SMALLINT, TF SMALLINT);
+
+
+
+CREATE TABLE test_table (group_name VARCHAR(15), member VARCHAR(15));
+INSERT INTO test_table (group_name, member) VALUES
+    ('sistar', 'bora'),
+    ('aespa', 'winter'),
+    ('aespa', 'karina');
+
+
+-- 가상환경 생성
+-- python -m venv spp-env-web
+-- source ./spp-env-web/bin/activate
