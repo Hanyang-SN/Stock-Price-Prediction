@@ -2,6 +2,8 @@ import pandas as pd
 from pykrx import stock
 from datetime import datetime, timedelta
 from flask import Flask
+from flask_cors import CORS
+
 
 finance_code_dict = dict()
 finance_code_list = "KB금융	105560 신한지주	055550 하나금융지주	086790 메리츠금융지주	138040 기업은행	024110 미래에셋증권	006800 NH투자증권	005940 삼성증권	016360".split()
@@ -18,6 +20,7 @@ def get_100_close(ticker_name): #train, test데이터 따로 df으로 -> 통합�
 
 # === Flask ===
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def home():
