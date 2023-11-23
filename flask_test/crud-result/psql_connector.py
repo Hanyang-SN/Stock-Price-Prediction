@@ -1,5 +1,5 @@
 import psycopg2
-import psql_connector 
+import datetime
 
 
 class Databases():
@@ -22,7 +22,7 @@ class Databases():
 
 class CRUD(Databases):
     def insert_db(self,table,colum,data, schema="public"):
-        sql = " INSERT INTO {schema}.{table}({colum}) VALUES ('{data}') ;".format(schema=schema,table=table,colum=colum,data=data)
+        sql = " INSERT INTO {schema}.{table}({colum}) VALUES ({data}) ;".format(schema=schema,table=table,colum=colum,data=data)
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -30,7 +30,7 @@ class CRUD(Databases):
             print(" insert DB err ",e) 
     
     def read_db(self,table, colum, schema="public"):
-        sql = " SELECT {colum} from {schema}.{table}".format(colum=colum,schema=schema,table=table)
+        sql = " SELECT {colum} from {schema}.{table} where date='{date}'".format(colum=colum,schema=schema,table=table, date=str(datetime.date.today()))
         try:
             self.cursor.execute(sql)
             result = self.cursor.fetchall()
@@ -58,5 +58,7 @@ class CRUD(Databases):
             print( "delete DB err", e)
 
 
-db_connector = CRUD()
-print(db_connector.read_db(table="test_table", colum="*"))
+if __name__ == "__main__":
+    db_connector = CRUD()
+    print(db_connector.read_db(table="test_table", colum="*"))
+    

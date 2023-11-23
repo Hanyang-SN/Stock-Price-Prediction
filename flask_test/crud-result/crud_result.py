@@ -90,29 +90,28 @@ CORS(app)
 # === put ===
 @app.route('/result/<table_name>', methods=['POST'])
 def put_result(table_name):
-    # 요청의 JSON 본문에서 데이터 추출
-    json = request.json
-    # print(type(json))
+	# 요청의 JSON 본문에서 데이터 추출
+	json = request.json
+	# 쿼리로 변환
+	data = f"'{json['date']}', {json['LSTM']}, {json['SVM']}, {json['TF']}"
 
-    print(json)
-
-    data = f"'{json['date']}', {json['LSTM']}, {json['SVM']}, {json['TF']}"
-    print(data)
-
-    db_connector.insert_db(table=table_name, colum=",".join(json.keys()), data=data)
-
-    print(db_connector.read_db(table=table_name, colum="*")) 
-    return f"message from put_result", 200
+	if not db_connector.read_db(table=table_name, colum="*"):
+		db_connector.insert_db(table=table_name, colum=",".join(json.keys()), data=data)
+		
+	return f"message from put_result", 200
 
 
 @app.route('/result/<table_name>', methods=['GET'])
 def get_result(table_name):   
-    data = db_connector.read_db(table=table_name, colum="*")
-    print(data)
-    print(type(data), len(data))
+	data = db_connector.read_db(table=table_name, colum="*")
+	# print(data)
+	# print(type(data), len(data))
 
-    json = {"date" : str(data[0][0]), "lstm": data[0][1], "svm" : data[0][2], "tf": data[0][3]}
-    return json
+	if not data:
+		return {}
+	else:
+		json = {"date" : str(data[0][0]), "lstm": data[0][1], "svm" : data[0][2], "tf": data[0][3]}
+		return json
 
 
 if __name__ == "__main__":
